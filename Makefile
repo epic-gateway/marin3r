@@ -262,6 +262,8 @@ bundle: operator-sdk manifests kustomize ## Generate bundle manifests and metada
 	cd config/webhook && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	$(OPERATOR_SDK) bundle validate ./bundle
+# build a manifest for EPIC
+	$(KUSTOMIZE) build config/epic > build/marin3r-manifest-epic.yaml
 
 .PHONY: bundle-build
 bundle-build: ## Build the bundle image.

@@ -34,3 +34,4 @@ kind-logs-*
 *.coverprofile
 *.coverprofile.*
 .vscode
+build/*yaml

@@ -1,0 +1,44 @@
+.set-tag: &set-tag
+- |
+  if [ -n "${CI_COMMIT_TAG}" ] ; then
+    # If this build is from a git tag, use that as the docker tag. The
+    # commit tag must be a semver that starts with "v". We strip out
+    # the "v" here because marin3r's Makefile adds it back.
+    export TAG_SPECIFIC="${CI_COMMIT_TAG:1}"
+  else
+    # If this build is from a branch, use the name and sha as the
+    # docker tag, and wrap it in a valid semver because people need to
+    # chill out about semver.
+    export TAG_SPECIFIC="0.0.0-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHORT_SHA}"
+  fi
+
+manifests:
+  image: golang:1.16-bullseye
+
+  before_script:
+  - *set-tag
+  - apt-get update
+  - apt-get install -y gettext-base
+  - mkdir build
+
+  script:
+  - make IMAGE_TAG_BASE=registry.gitlab.com/acnodal/epic/marin3r VERSION=${TAG_SPECIFIC} bundle
+  - 'curl --silent --show-error --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file build/marin3r-manifest-epic.yaml "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/manifest/v${TAG_SPECIFIC}/marin3r-manifest-epic.yaml"'
+
+  artifacts:
+    paths:
+      - build/marin3r-manifest*.yaml
+      - config
+
+images:
+  image: docker:20.10.10
+  services:
+  - docker:20.10.10-dind
+
+  before_script:
+  - *set-tag
+  - apk add make bash go
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+  script:
+  - make --debug=vj IMAGE_TAG_BASE=registry.gitlab.com/acnodal/epic/marin3r VERSION=${TAG_SPECIFIC} docker-build docker-push
