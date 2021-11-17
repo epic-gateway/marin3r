@@ -233,6 +233,11 @@ bundle: operator-sdk manifests kustomize ## Generate bundle manifests and metada
 	cd config/webhook && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	$(OPERATOR_SDK) bundle validate ./bundle
+# build a "pristine" upstream manifest for EPIC
+	$(KUSTOMIZE) build config/default > build/marin3r-manifest.yaml
+# filter the manifest so it has a token for the image that the EPIC
+# snap will replace during the install process
+	sed "s~${IMG}~EPIC_MARIN3R_IMG~" build/marin3r-manifest.yaml > build/marin3r-manifest-snap.yaml
 
 .PHONY: bundle-build
 bundle-build: ## Build the bundle image.
