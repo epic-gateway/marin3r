@@ -4,3 +4,17 @@ bases:
 patchesStrategicMerge:
 - gitlab-secrets-manager-patch.yaml
 - gitlab-secrets-webhook-patch.yaml
+
+patches:
+- path: clusterrole_patch.yaml
+  target:
+    group: rbac.authorization.k8s.io
+    kind: Role
+    name: manager-role
+    version: v1
+- path: clusterrolebinding_patch.yaml
+  target:
+    group: rbac.authorization.k8s.io
+    kind: RoleBinding
+    name: manager-rolebinding
+    version: v1
