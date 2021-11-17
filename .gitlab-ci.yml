@@ -12,30 +12,26 @@
     export TAG_SPECIFIC="0.0.0-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHORT_SHA}"
   fi
 
-manifest:
+manifests:
   image: golang:1.16-bullseye
 
   before_script:
   - *set-tag
   - apt-get update
   - apt-get install -y gettext-base
+  - mkdir build
 
   script:
   - make IMAGE_TAG_BASE=registry.gitlab.com/acnodal/epic/marin3r VERSION=${TAG_SPECIFIC} bundle
-  # build a "pristine" upstream manifest
-  - bin/kustomize build config/default > marin3r-manifest.yaml
-  - 'curl --silent --show-error --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file marin3r-manifest.yaml "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/manifest/v${TAG_SPECIFIC}/marin3r-manifest.yaml"'
-  # filter the manifest so it has a token for the image that the snap
-  # will replace during the install process
-  - sed "s~registry.gitlab.com/acnodal/epic/marin3r:v${TAG_SPECIFIC}~EPIC_MARIN3R_IMG~" marin3r-manifest.yaml > marin3r-manifest-snap.yaml
-  - 'curl --silent --show-error --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file marin3r-manifest-snap.yaml "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/manifest/v${TAG_SPECIFIC}/marin3r-manifest-snap.yaml"'
+  - 'curl --silent --show-error --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file build/marin3r-manifest.yaml "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/manifest/v${TAG_SPECIFIC}/marin3r-manifest.yaml"'
+  - 'curl --silent --show-error --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file build/marin3r-manifest-snap.yaml "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/manifest/v${TAG_SPECIFIC}/marin3r-manifest-snap.yaml"'
 
   artifacts:
     paths:
-      - marin3r-manifest*.yaml
+      - build/marin3r-manifest*.yaml
       - config
 
-docker:
+images:
   image: docker:20.10.10
   services:
   - docker:20.10.10-dind
