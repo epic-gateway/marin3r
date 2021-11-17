@@ -1,0 +1,6 @@
+bases:
+- ../default
+
+patchesStrategicMerge:
+- gitlab-secrets-manager-patch.yaml
+- gitlab-secrets-webhook-patch.yaml
