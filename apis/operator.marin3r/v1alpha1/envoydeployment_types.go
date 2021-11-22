@@ -137,6 +137,10 @@ type EnvoyDeploymentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+	// EnvVars allows the user to define environment variables for the Envoy process.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +optional
+	EnvVars []corev1.EnvVar `json:"envVars,omitempty"`
 }
 
 // Image returns the envoy container image to use

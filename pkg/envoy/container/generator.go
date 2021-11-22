@@ -31,6 +31,7 @@ type ContainerConfig struct {
 	Ports              []corev1.ContainerPort
 	LivenessProbe      operatorv1alpha1.ProbeSpec
 	ReadinessProbe     operatorv1alpha1.ProbeSpec
+	EnvVars            []corev1.EnvVar
 
 	// Init manager container configuration
 	InitManagerImage string
@@ -50,6 +51,7 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 		Name:    cc.Name,
 		Image:   cc.Image,
 		Command: []string{"envoy"},
+		Env:     cc.EnvVars,
 		Args: func() []string {
 			args := []string{"-c",
 				fmt.Sprintf("%s/%s", cc.ConfigBasePath, cc.ConfigFileName),

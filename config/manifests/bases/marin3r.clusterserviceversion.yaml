@@ -408,6 +408,10 @@ spec:
           authenticate with the DiscoveryService
         displayName: Client Certificate Duration
         path: duration
+      - description: EnvVars allows the user to define environment variables for the
+          Envoy process.
+        displayName: Env Vars
+        path: envVars
       - description: EnvoyConfigRef points to an EnvoyConfig in the same namespace
           that holds the envoy resources for this Deployment
         displayName: Envoy Config Ref

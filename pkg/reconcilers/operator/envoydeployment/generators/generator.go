@@ -36,6 +36,7 @@ type GeneratorOptions struct {
 	ShutdownManager           *operatorv1alpha1.ShutdownManager
 	InitManager               *operatorv1alpha1.InitManager
 	Annotations               map[string]string
+	EnvVars                   []corev1.EnvVar
 }
 
 func (cfg *GeneratorOptions) labels() map[string]string {
