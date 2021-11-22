@@ -100,7 +100,7 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 		},
 		TerminationMessagePath:   corev1.TerminationMessagePathDefault,
 		TerminationMessagePolicy: corev1.TerminationMessageReadFile,
-		ImagePullPolicy:          corev1.PullIfNotPresent,
+		ImagePullPolicy:          corev1.PullAlways,
 	}}
 
 	if cc.ShutdownManagerEnabled {
@@ -147,7 +147,7 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 			},
 			TerminationMessagePath:   corev1.TerminationMessagePathDefault,
 			TerminationMessagePolicy: corev1.TerminationMessageReadFile,
-			ImagePullPolicy:          corev1.PullIfNotPresent,
+			ImagePullPolicy:          corev1.PullAlways,
 		})
 
 		containers[0].Lifecycle = &corev1.Lifecycle{
