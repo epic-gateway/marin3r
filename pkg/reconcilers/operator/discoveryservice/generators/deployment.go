@@ -42,6 +42,11 @@ func (cfg *GeneratorOptions) Deployment(hash string) lockedresources.GeneratorFu
 						}(),
 					},
 					Spec: corev1.PodSpec{
+						ImagePullSecrets: []corev1.LocalObjectReference{
+							{
+								Name: "gitlab",
+							},
+						},
 						Volumes: []corev1.Volume{
 							{
 								Name: "server-cert",
