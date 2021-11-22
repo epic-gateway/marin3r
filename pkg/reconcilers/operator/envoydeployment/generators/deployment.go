@@ -35,6 +35,7 @@ func (cfg *GeneratorOptions) Deployment(replicas *int32) lockedresources.Generat
 				}
 				return ports
 			}(),
+			EnvVars:            cfg.EnvVars,
 			ConfigBasePath:     defaults.EnvoyConfigBasePath,
 			ConfigFileName:     defaults.EnvoyConfigFileName,
 			ConfigVolume:       defaults.DeploymentConfigVolume,
