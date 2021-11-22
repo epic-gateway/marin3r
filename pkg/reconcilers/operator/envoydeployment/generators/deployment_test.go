@@ -77,6 +77,7 @@ func TestGeneratorOptions_Deployment(t *testing.T) {
 								"app.kubernetes.io/instance":   "instance",
 							}},
 						Spec: corev1.PodSpec{
+							ImagePullSecrets: []corev1.LocalObjectReference{{Name: "gitlab"}},
 							Volumes: []corev1.Volume{
 								{
 									Name: defaults.DeploymentTLSVolume,

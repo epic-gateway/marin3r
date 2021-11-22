@@ -80,6 +80,7 @@ func TestGeneratorOptions_Deployment(t *testing.T) {
 								operatorv1alpha1.DiscoveryServiceCertificateHashLabelKey: "hash",
 							}},
 						Spec: corev1.PodSpec{
+							ImagePullSecrets: []corev1.LocalObjectReference{{Name: "gitlab"}},
 							Volumes: []corev1.Volume{
 								{
 									Name: "server-cert",
