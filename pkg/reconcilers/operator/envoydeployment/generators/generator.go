@@ -35,6 +35,7 @@ type GeneratorOptions struct {
 	PodDisruptionBudget       operatorv1alpha1.PodDisruptionBudgetSpec
 	ShutdownManager           *operatorv1alpha1.ShutdownManager
 	InitManager               *operatorv1alpha1.InitManager
+	Annotations               map[string]string
 }
 
 func (cfg *GeneratorOptions) labels() map[string]string {

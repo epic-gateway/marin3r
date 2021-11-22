@@ -87,6 +87,7 @@ func (cfg *GeneratorOptions) Deployment() func() *appsv1.Deployment {
 					ObjectMeta: metav1.ObjectMeta{
 						CreationTimestamp: metav1.Time{},
 						Labels:            cfg.labels(),
+						Annotations:       cfg.Annotations,
 					},
 					Spec: corev1.PodSpec{
 						Affinity:                 cfg.Affinity,

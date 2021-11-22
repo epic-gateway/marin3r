@@ -135,6 +135,11 @@ type EnvoyDeploymentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// +optional
 	InitManager *InitManager `json:"initManager,omitempty"`
+	// Annotations allows the user to add annotations to the envoy
+	// deployment template.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // Image returns the envoy container image to use
