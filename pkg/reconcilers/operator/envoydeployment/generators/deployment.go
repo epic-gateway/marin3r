@@ -89,6 +89,11 @@ func (cfg *GeneratorOptions) Deployment(replicas *int32) lockedresources.Generat
 						Annotations:       cfg.Annotations,
 					},
 					Spec: corev1.PodSpec{
+						ImagePullSecrets: []corev1.LocalObjectReference{
+							{
+								Name: "gitlab",
+							},
+						},
 						Affinity:                 cfg.Affinity,
 						Volumes:                  cc.Volumes(),
 						InitContainers:           cc.InitContainers(),
