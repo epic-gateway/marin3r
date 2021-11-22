@@ -33,6 +33,7 @@ func (cfg *GeneratorOptions) Deployment() func() *appsv1.Deployment {
 				}
 				return ports
 			}(),
+			EnvVars:            cfg.EnvVars,
 			ConfigBasePath:     defaults.EnvoyConfigBasePath,
 			ConfigFileName:     defaults.EnvoyConfigFileName,
 			ConfigVolume:       defaults.DeploymentConfigVolume,
