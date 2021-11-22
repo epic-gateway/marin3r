@@ -130,7 +130,7 @@ func TestContainerConfig_Containers(t *testing.T) {
 				},
 				TerminationMessagePath:   corev1.TerminationMessagePathDefault,
 				TerminationMessagePolicy: corev1.TerminationMessageReadFile,
-				ImagePullPolicy:          corev1.PullIfNotPresent,
+				ImagePullPolicy:          corev1.PullAlways,
 			}},
 		},
 		{
@@ -248,7 +248,7 @@ func TestContainerConfig_Containers(t *testing.T) {
 					},
 					TerminationMessagePath:   corev1.TerminationMessagePathDefault,
 					TerminationMessagePolicy: corev1.TerminationMessageReadFile,
-					ImagePullPolicy:          corev1.PullIfNotPresent,
+					ImagePullPolicy:          corev1.PullAlways,
 					Lifecycle: &corev1.Lifecycle{
 						PreStop: &corev1.Handler{
 							HTTPGet: &corev1.HTTPGetAction{
@@ -299,7 +299,7 @@ func TestContainerConfig_Containers(t *testing.T) {
 					},
 					TerminationMessagePath:   corev1.TerminationMessagePathDefault,
 					TerminationMessagePolicy: corev1.TerminationMessageReadFile,
-					ImagePullPolicy:          corev1.PullIfNotPresent,
+					ImagePullPolicy:          corev1.PullAlways,
 				},
 			},
 		},
