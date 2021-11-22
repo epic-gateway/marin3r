@@ -85,6 +85,7 @@ func (cfg *GeneratorOptions) Deployment(replicas *int32) lockedresources.Generat
 					ObjectMeta: metav1.ObjectMeta{
 						CreationTimestamp: metav1.Time{},
 						Labels:            cfg.labels(),
+						Annotations:       cfg.Annotations,
 					},
 					Spec: corev1.PodSpec{
 						Affinity:                 cfg.Affinity,

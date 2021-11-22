@@ -392,6 +392,10 @@ spec:
       - description: Affinity configuration for the envoy pods
         displayName: Affinity
         path: affinity
+      - description: Annotations allows the user to add annotations to the envoy deployment
+          template.
+        displayName: Annotations
+        path: annotations
       - description: Defines the local service cluster name where Envoy is running.
           Defaults to the NodeID in the EnvoyConfig if unset
         displayName: Cluster ID

@@ -146,6 +146,7 @@ func (r *EnvoyDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		PodDisruptionBudget:       ed.PodDisruptionBudget(),
 		ShutdownManager:           ed.Spec.ShutdownManager,
 		InitManager:               ed.Spec.InitManager,
+		Annotations:               ed.Spec.Annotations,
 	}
 
 	replicas, err := r.getDeploymentReplicas(ctx, generate.OwnedResourceKey())
