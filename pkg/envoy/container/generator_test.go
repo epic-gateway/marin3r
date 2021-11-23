@@ -100,7 +100,7 @@ func TestContainerConfig_Containers(t *testing.T) {
 					},
 					{
 						Name:      "config",
-						ReadOnly:  true,
+						ReadOnly:  false,
 						MountPath: "/config",
 					},
 				},
@@ -227,7 +227,7 @@ func TestContainerConfig_Containers(t *testing.T) {
 						},
 						{
 							Name:      "config",
-							ReadOnly:  true,
+							ReadOnly:  false,
 							MountPath: "/config",
 						},
 					},

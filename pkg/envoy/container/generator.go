@@ -88,7 +88,7 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 			},
 			{
 				Name:      cc.ConfigVolume,
-				ReadOnly:  true,
+				ReadOnly:  false,
 				MountPath: cc.ConfigBasePath,
 			},
 		},
