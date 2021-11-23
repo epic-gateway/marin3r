@@ -9,6 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/pointer"
 )
 
 type ContainerConfig struct {
@@ -66,6 +67,12 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 			return args
 		}(),
 		Resources: cc.Resources,
+		SecurityContext: &corev1.SecurityContext{
+			Privileged: pointer.BoolPtr(true),
+			Capabilities: &corev1.Capabilities{
+				Add: []corev1.Capability{"NET_ADMIN"},
+			},
+		},
 		Ports: append(cc.Ports, corev1.ContainerPort{
 			Name:          "admin",
 			ContainerPort: cc.AdminPort,
