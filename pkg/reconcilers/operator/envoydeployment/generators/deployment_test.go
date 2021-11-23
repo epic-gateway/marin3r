@@ -155,7 +155,7 @@ func TestGeneratorOptions_Deployment(t *testing.T) {
 								{
 									Name:    defaults.DeploymentContainerName,
 									Image:   "test:latest",
-									Command: []string{"envoy"},
+									Command: []string{"/docker-entrypoint.sh"},
 									Args: []string{
 										"-c",
 										fmt.Sprintf("%s/%s", defaults.EnvoyConfigBasePath, defaults.EnvoyConfigFileName),
