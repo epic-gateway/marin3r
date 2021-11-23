@@ -18,6 +18,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/any"
 	_struct "github.com/golang/protobuf/ptypes/struct"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // Config is a struct with options and methods to generate an envoy bootstrap config
@@ -139,6 +140,52 @@ func (c *Config) GenerateStatic() (string, error) {
 						Name: wellknown.TransportSocketTls,
 						ConfigType: &envoy_config_core_v3.TransportSocket_TypedConfig{
 							TypedConfig: serializedTLSContext,
+						},
+					},
+				},
+				{
+					Name:           "eds-server",
+					ConnectTimeout: ptypes.DurationProto(1 * time.Second),
+					ClusterDiscoveryType: &envoy_config_cluster_v3.Cluster_Type{
+						Type: envoy_config_cluster_v3.Cluster_STRICT_DNS,
+					},
+					Http2ProtocolOptions: &envoy_config_core_v3.Http2ProtocolOptions{},
+					LoadAssignment: &envoy_config_endpoint_v3.ClusterLoadAssignment{
+						ClusterName: "eds-server",
+						Endpoints: []*envoy_config_endpoint_v3.LocalityLbEndpoints{
+							{
+								LbEndpoints: []*envoy_config_endpoint_v3.LbEndpoint{
+									{
+										HostIdentifier: &envoy_config_endpoint_v3.LbEndpoint_Endpoint{
+											Endpoint: &envoy_config_endpoint_v3.Endpoint{
+												Address: &envoy_config_core_v3.Address{
+													Address: &envoy_config_core_v3.Address_SocketAddress{
+														SocketAddress: &envoy_config_core_v3.SocketAddress{
+															Address: "eds-server.epic",
+															PortSpecifier: &envoy_config_core_v3.SocketAddress_PortValue{
+																PortValue: c.Options.XdsPort,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					TransportSocket: &envoy_config_core_v3.TransportSocket{
+						Name: wellknown.TransportSocketTls,
+						ConfigType: &envoy_config_core_v3.TransportSocket_TypedConfig{
+							TypedConfig: serializedTLSContext,
+						},
+					},
+					UpstreamConnectionOptions: &envoy_config_cluster_v3.UpstreamConnectionOptions{
+						TcpKeepalive: &envoy_config_core_v3.TcpKeepalive{
+							KeepaliveProbes:   &wrapperspb.UInt32Value{Value: 4},
+							KeepaliveTime:     &wrapperspb.UInt32Value{Value: 10},
+							KeepaliveInterval: &wrapperspb.UInt32Value{Value: 5},
 						},
 					},
 				},
