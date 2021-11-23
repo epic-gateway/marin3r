@@ -165,6 +165,12 @@ func TestGeneratorOptions_Deployment(t *testing.T) {
 										"test",
 									},
 									Resources: corev1.ResourceRequirements{},
+									SecurityContext: &corev1.SecurityContext{
+										Privileged: pointer.New(true),
+										Capabilities: &corev1.Capabilities{
+											Add: []corev1.Capability{"NET_ADMIN"},
+										},
+									},
 									Ports: []corev1.ContainerPort{
 										{
 											Name:          "port",

@@ -75,6 +75,12 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 			return args
 		}(),
 		Resources: cc.Resources,
+		SecurityContext: &corev1.SecurityContext{
+			Privileged: pointer.New(true),
+			Capabilities: &corev1.Capabilities{
+				Add: []corev1.Capability{"NET_ADMIN"},
+			},
+		},
 		Ports: append(cc.Ports, corev1.ContainerPort{
 			Name:          "admin",
 			ContainerPort: cc.AdminPort,
