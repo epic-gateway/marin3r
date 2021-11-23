@@ -53,7 +53,7 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 	containers := []corev1.Container{{
 		Name:    cc.Name,
 		Image:   cc.Image,
-		Command: []string{"envoy"},
+		Command: []string{"/docker-entrypoint.sh"},
 		Env:     cc.EnvVars,
 		Args: func() []string {
 			args := []string{"-c",

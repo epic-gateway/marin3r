@@ -65,7 +65,7 @@ func TestContainerConfig_Containers(t *testing.T) {
 			want: []corev1.Container{{
 				Name:    "envoy",
 				Image:   "envoy:test",
-				Command: []string{"envoy"},
+				Command: []string{"/docker-entrypoint.sh"},
 				Args: []string{
 					"-c",
 					"/config/config.json",
@@ -152,7 +152,7 @@ func TestContainerConfig_Containers(t *testing.T) {
 				{
 					Name:    "envoy",
 					Image:   "envoy:test",
-					Command: []string{"envoy"},
+					Command: []string{"/docker-entrypoint.sh"},
 					Args: []string{
 						"-c",
 						"/config/config.json",
