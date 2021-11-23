@@ -181,7 +181,7 @@ func TestGeneratorOptions_Deployment(t *testing.T) {
 										},
 										{
 											Name:      defaults.DeploymentConfigVolume,
-											ReadOnly:  true,
+											ReadOnly:  false,
 											MountPath: defaults.EnvoyConfigBasePath,
 										},
 									},
