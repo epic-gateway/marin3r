@@ -8,7 +8,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func (cfg *GeneratorOptions) Deployment(hash string) func() *appsv1.Deployment {
@@ -113,24 +112,6 @@ func (cfg *GeneratorOptions) Deployment(hash string) func() *appsv1.Deployment {
 											FieldPath:  "metadata.name",
 										},
 									}},
-								},
-								LivenessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path:   "/healthz",
-											Port:   intstr.FromInt(int(cfg.ProbePort)),
-											Scheme: corev1.URISchemeHTTP,
-										},
-									},
-								},
-								ReadinessProbe: &corev1.Probe{
-									ProbeHandler: corev1.ProbeHandler{
-										HTTPGet: &corev1.HTTPGetAction{
-											Path:   "/readyz",
-											Port:   intstr.FromInt(int(cfg.ProbePort)),
-											Scheme: corev1.URISchemeHTTP,
-										},
-									},
 								},
 								Resources: cfg.DeploymentResources,
 								VolumeMounts: []corev1.VolumeMount{

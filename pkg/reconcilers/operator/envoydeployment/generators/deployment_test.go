@@ -194,34 +194,6 @@ func TestGeneratorOptions_Deployment(t *testing.T) {
 											MountPath: defaults.EnvoyConfigBasePath,
 										},
 									},
-									LivenessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/ready",
-												Port:   intstr.IntOrString{IntVal: 9901},
-												Scheme: corev1.URISchemeHTTP,
-											},
-										},
-										InitialDelaySeconds: 30,
-										TimeoutSeconds:      1,
-										PeriodSeconds:       10,
-										SuccessThreshold:    1,
-										FailureThreshold:    10,
-									},
-									ReadinessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/ready",
-												Port:   intstr.IntOrString{IntVal: 9901},
-												Scheme: corev1.URISchemeHTTP,
-											},
-										},
-										InitialDelaySeconds: 15,
-										TimeoutSeconds:      1,
-										PeriodSeconds:       5,
-										SuccessThreshold:    1,
-										FailureThreshold:    1,
-									},
 									TerminationMessagePath:   corev1.TerminationMessagePathDefault,
 									TerminationMessagePolicy: corev1.TerminationMessageReadFile,
 									ImagePullPolicy:          corev1.PullIfNotPresent,

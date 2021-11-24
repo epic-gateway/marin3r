@@ -10,7 +10,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func TestGeneratorOptions_Deployment(t *testing.T) {
@@ -144,24 +143,6 @@ func TestGeneratorOptions_Deployment(t *testing.T) {
 												FieldPath:  "metadata.name",
 											},
 										}},
-									},
-									LivenessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/healthz",
-												Port:   intstr.FromInt(1002),
-												Scheme: corev1.URISchemeHTTP,
-											},
-										},
-									},
-									ReadinessProbe: &corev1.Probe{
-										ProbeHandler: corev1.ProbeHandler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path:   "/readyz",
-												Port:   intstr.FromInt(1002),
-												Scheme: corev1.URISchemeHTTP,
-											},
-										},
 									},
 									Resources: corev1.ResourceRequirements{},
 									VolumeMounts: []corev1.VolumeMount{

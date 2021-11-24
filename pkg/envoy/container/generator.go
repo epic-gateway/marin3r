@@ -98,34 +98,6 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 				MountPath: cc.ConfigBasePath,
 			},
 		},
-		LivenessProbe: &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path:   "/ready",
-					Port:   intstr.IntOrString{IntVal: cc.AdminPort},
-					Scheme: corev1.URISchemeHTTP,
-				},
-			},
-			InitialDelaySeconds: cc.LivenessProbe.InitialDelaySeconds,
-			TimeoutSeconds:      cc.LivenessProbe.TimeoutSeconds,
-			PeriodSeconds:       cc.LivenessProbe.PeriodSeconds,
-			SuccessThreshold:    cc.LivenessProbe.SuccessThreshold,
-			FailureThreshold:    cc.LivenessProbe.FailureThreshold,
-		},
-		ReadinessProbe: &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path:   "/ready",
-					Port:   intstr.IntOrString{IntVal: cc.AdminPort},
-					Scheme: corev1.URISchemeHTTP,
-				},
-			},
-			InitialDelaySeconds: cc.ReadinessProbe.InitialDelaySeconds,
-			TimeoutSeconds:      cc.ReadinessProbe.TimeoutSeconds,
-			PeriodSeconds:       cc.ReadinessProbe.PeriodSeconds,
-			SuccessThreshold:    cc.ReadinessProbe.SuccessThreshold,
-			FailureThreshold:    cc.ReadinessProbe.FailureThreshold,
-		},
 		TerminationMessagePath:   corev1.TerminationMessagePathDefault,
 		TerminationMessagePolicy: corev1.TerminationMessageReadFile,
 		ImagePullPolicy:          corev1.PullIfNotPresent,
