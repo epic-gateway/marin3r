@@ -766,6 +766,12 @@ spec:
                 items:
                   type: string
                 type: array
+              extraLabels:
+                additionalProperties:
+                  type: string
+                description: ExtraLabels allows the user to add extra labels to the
+                  envoy deployment template.
+                type: object
               image:
                 description: Image is the envoy image and tag to use
                 type: string

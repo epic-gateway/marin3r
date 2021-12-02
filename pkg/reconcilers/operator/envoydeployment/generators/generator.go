@@ -37,15 +37,22 @@ type GeneratorOptions struct {
 	InitManager               *operatorv1alpha1.InitManager
 	Annotations               map[string]string
 	EnvVars                   []corev1.EnvVar
+	ExtraLabels               map[string]string
 }
 
-func (cfg *GeneratorOptions) labels() map[string]string {
-	return map[string]string{
+func (cfg *GeneratorOptions) labels() (labels map[string]string) {
+	labels = map[string]string{
 		"app.kubernetes.io/name":       "marin3r",
 		"app.kubernetes.io/managed-by": "marin3r-operator",
 		"app.kubernetes.io/component":  "envoy-deployment",
 		"app.kubernetes.io/instance":   cfg.InstanceName,
 	}
+	if len(cfg.ExtraLabels) > 0 {
+		for k, v := range cfg.ExtraLabels {
+			labels[k] = v
+		}
+	}
+	return
 }
 
 func (cfg *GeneratorOptions) resourceName() string {

@@ -148,6 +148,7 @@ func (r *EnvoyDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		InitManager:               ed.Spec.InitManager,
 		Annotations:               ed.Spec.Annotations,
 		EnvVars:                   ed.Spec.EnvVars,
+		ExtraLabels:               ed.Spec.ExtraLabels,
 	}
 
 	replicas, err := r.getDeploymentReplicas(ctx, generate.OwnedResourceKey())
