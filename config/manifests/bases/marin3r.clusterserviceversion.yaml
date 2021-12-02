@@ -631,6 +631,10 @@ spec:
           Envoy process
         displayName: Extra Args
         path: extraArgs
+      - description: ExtraLabels allows the user to add extra labels to the envoy
+          deployment template.
+        displayName: Extra Labels
+        path: extraLabels
       - description: Image is the envoy image and tag to use
         displayName: Image
         path: image

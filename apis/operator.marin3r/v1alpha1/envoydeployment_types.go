@@ -144,6 +144,11 @@ type EnvoyDeploymentSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// +optional
 	EnvVars []corev1.EnvVar `json:"envVars,omitempty"`
+	// ExtraLabels allows the user to add extra labels to the envoy
+	// deployment template.
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +optional
+	ExtraLabels map[string]string `json:"extraLabels,omitempty"`
 }
 
 // Image returns the envoy container image to use
