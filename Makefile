@@ -87,8 +87,8 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
-go-generate: gen-pkg-version gen-pkg-envoy-proto
-	VERSION=$(VERSION) PATH=$$PATH:$$PWD/bin go generate ./...
+go-generate: gen-pkg-version gen-pkg-image gen-pkg-envoy-proto
+	IMAGE=$(IMG) VERSION=$(VERSION) PATH=$$PATH:$$PWD/bin go generate ./...
 
 ##@ Test
 
@@ -410,3 +410,7 @@ gen-pkg-envoy-proto: ## builds the gen-pkg-envoy-proto binary
 gen-pkg-version: export TARGET_PATH = $(PWD)/bin
 gen-pkg-version: ## builds the gen-pkg-version binary
 	 cd generators/pkg-version && go build -o $${TARGET_PATH}/gen-pkg-version main.go
+
+gen-pkg-image: export TARGET_PATH = $(PWD)/bin
+gen-pkg-image: ## builds the gen-pkg-image binary
+	 cd generators/pkg-image && go build -o $${TARGET_PATH}/gen-pkg-image main.go
