@@ -41,4 +41,8 @@ images:
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
   script:
-  - make --debug=vj IMAGE_TAG_BASE=registry.gitlab.com/acnodal/epic/marin3r VERSION=${TAG_SPECIFIC} docker-build docker-push
+  - make IMAGE_TAG_BASE=registry.gitlab.com/acnodal/epic/marin3r VERSION=${TAG_SPECIFIC} go-generate docker-build docker-push
+
+  artifacts:
+    paths:
+      - pkg
