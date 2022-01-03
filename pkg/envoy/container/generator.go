@@ -106,7 +106,7 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 			Handler: corev1.Handler{
 				HTTPGet: &corev1.HTTPGetAction{
 					Path: "/ready",
-					Port: intstr.IntOrString{IntVal: cc.AdminPort},
+					Port: intstr.IntOrString{IntVal: cc.Ports[0].ContainerPort},
 				},
 			},
 			InitialDelaySeconds: cc.ReadinessProbe.InitialDelaySeconds,
