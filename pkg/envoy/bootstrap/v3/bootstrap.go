@@ -14,7 +14,6 @@ import (
 	envoy_extensions_transport_sockets_tls_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_service_discovery_v3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -145,7 +144,7 @@ func (c *Config) GenerateStatic() (string, error) {
 				},
 				{
 					Name:           "eds-server",
-					ConnectTimeout: ptypes.DurationProto(1 * time.Second),
+					ConnectTimeout: durationpb.New(1 * time.Second),
 					ClusterDiscoveryType: &envoy_config_cluster_v3.Cluster_Type{
 						Type: envoy_config_cluster_v3.Cluster_STRICT_DNS,
 					},
