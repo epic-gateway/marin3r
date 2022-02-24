@@ -77,7 +77,6 @@ func (r *EnvoyConfigRevisionReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	if ok := envoyconfigrevision.IsInitialized(ecr); !ok {
 		if err := r.Client.Update(ctx, ecr); err != nil {
-			log.Error(err, "unable to update EnvoyConfigRevision")
 			return ctrl.Result{}, err
 		}
 		log.Info("initialized EnvoyConfigRevision resource")
@@ -91,7 +90,6 @@ func (r *EnvoyConfigRevisionReconciler) Reconcile(ctx context.Context, req ctrl.
 		envoyconfigrevision.CleanupLogic(ecr, r.XdsCache, r.DiscoveryStats, log)
 		controllerutil.RemoveFinalizer(ecr, marin3rv1alpha1.EnvoyConfigRevisionFinalizer)
 		if err = r.Client.Update(ctx, ecr); err != nil {
-			log.Error(err, "unable to update EnvoyConfigRevision")
 			return reconcile.Result{}, err
 		}
 		log.Info("finalized EnvoyConfigRevision resource")

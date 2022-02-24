@@ -145,14 +145,12 @@ func (r *RevisionReconciler) Reconcile() (ctrl.Result, error) {
 	for _, ecr := range shouldBeFalse {
 
 		if err := r.client.Status().Update(r.ctx, &ecr); err != nil {
-			log.Error(err, "unable to update revision", "Phase", "UnpublishOldRevisions", "Name/Namespace", util.ObjectKey(&ecr))
 			return ctrl.Result{}, err
 		}
 	}
 
 	if shouldBeTrue != nil {
 		if err := r.client.Status().Update(r.ctx, shouldBeTrue); err != nil {
-			log.Error(err, "unable to update revision", "Phase", "PublishNewRevision", "Name/Namespace", util.ObjectKey(shouldBeTrue))
 			return ctrl.Result{}, err
 		}
 		log.Info("updated the published EnvoyConfigRevision", "Namespace/Name", util.ObjectKey(shouldBeTrue))

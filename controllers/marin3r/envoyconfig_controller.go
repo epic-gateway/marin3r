@@ -64,7 +64,6 @@ func (r *EnvoyConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	if ok := envoyconfig.IsInitialized(ec); !ok {
 		if err := r.Client.Update(ctx, ec); err != nil {
-			log.Error(err, "unable to update EnvoyConfig")
 			return ctrl.Result{}, err
 		}
 		log.Info("initialized EnvoyConfig resource")
@@ -82,7 +81,6 @@ func (r *EnvoyConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	if ok := envoyconfig.IsStatusReconciled(ec, revisionReconciler.GetCacheState(), revisionReconciler.PublishedVersion(), revisionReconciler.GetRevisionList()); !ok {
 		if err := r.Client.Status().Update(ctx, ec); err != nil {
-			log.Error(err, "unable to update EnvoyConfig status")
 			return ctrl.Result{}, err
 		}
 		log.Info("status updated for EnvoyConfig resource")
