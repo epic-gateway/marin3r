@@ -12,10 +12,10 @@ import (
 	envoy_config_route_v3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	envoy_extensions_transport_sockets_tls_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_service_runtime_v3 "github.com/envoyproxy/go-control-plane/envoy/service/runtime/v3"
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/any"
-	_struct "github.com/golang/protobuf/ptypes/struct"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var (
@@ -51,22 +51,24 @@ var (
 				TransportSocket: &envoy_config_core_v3.TransportSocket{
 					Name: "envoy.transport_sockets.tls",
 					ConfigType: &envoy_config_core_v3.TransportSocket_TypedConfig{
-						TypedConfig: func() *any.Any {
-							any, err := ptypes.MarshalAny(&envoy_extensions_transport_sockets_tls_v3.DownstreamTlsContext{
-								CommonTlsContext: &envoy_extensions_transport_sockets_tls_v3.CommonTlsContext{
-									TlsCertificateSdsSecretConfigs: []*envoy_extensions_transport_sockets_tls_v3.SdsSecretConfig{
-										{
-											Name: "secret",
-											SdsConfig: &envoy_config_core_v3.ConfigSource{
-												ConfigSourceSpecifier: &envoy_config_core_v3.ConfigSource_Ads{
-													Ads: &envoy_config_core_v3.AggregatedConfigSource{},
+						TypedConfig: func() *anypb.Any {
+							any, err := anypb.New(
+								&envoy_extensions_transport_sockets_tls_v3.DownstreamTlsContext{
+									CommonTlsContext: &envoy_extensions_transport_sockets_tls_v3.CommonTlsContext{
+										TlsCertificateSdsSecretConfigs: []*envoy_extensions_transport_sockets_tls_v3.SdsSecretConfig{
+											{
+												Name: "secret",
+												SdsConfig: &envoy_config_core_v3.ConfigSource{
+													ConfigSourceSpecifier: &envoy_config_core_v3.ConfigSource_Ads{
+														Ads: &envoy_config_core_v3.AggregatedConfigSource{},
+													},
+													ResourceApiVersion: envoy_config_core_v3.ApiVersion_V3,
 												},
-												ResourceApiVersion: envoy_config_core_v3.ApiVersion_V3,
 											},
 										},
 									},
-								},
-							})
+								})
+
 							if err != nil {
 								panic(err)
 							}
@@ -107,7 +109,7 @@ var (
         `
 	cluster *envoy_config_cluster_v3.Cluster = &envoy_config_cluster_v3.Cluster{
 		Name:           "cluster1",
-		ConnectTimeout: ptypes.DurationProto(2 * time.Second),
+		ConnectTimeout: durationpb.New(2 * time.Second),
 		ClusterDiscoveryType: &envoy_config_cluster_v3.Cluster_Type{
 			Type: envoy_config_cluster_v3.Cluster_STRICT_DNS,
 		},
@@ -144,13 +146,27 @@ var (
 		}},
 	}
 
+	scopedRouteJSON string                                          = `{"name":"scoped_route1","route_configuration_name":"route1","key":{"fragments":[{"string_key":"test"}]}}`
+	scopedRoute     *envoy_config_route_v3.ScopedRouteConfiguration = &envoy_config_route_v3.ScopedRouteConfiguration{
+		OnDemand:               false,
+		Name:                   "scoped_route1",
+		RouteConfigurationName: "route1",
+		Key: &envoy_config_route_v3.ScopedRouteConfiguration_Key{
+			Fragments: []*envoy_config_route_v3.ScopedRouteConfiguration_Key_Fragment{{
+				Type: &envoy_config_route_v3.ScopedRouteConfiguration_Key_Fragment_StringKey{
+					StringKey: "test",
+				},
+			}},
+		},
+	}
+
 	runtimeJSON string                            = `{"name":"runtime1","layer":{"static_layer_0":"value"}}`
 	runtime     *envoy_service_runtime_v3.Runtime = &envoy_service_runtime_v3.Runtime{
 		Name: "runtime1",
 		// See https://www.envoyproxy.io/docs/envoy/latest/configuration/operations/runtime
-		Layer: &_struct.Struct{
-			Fields: map[string]*_struct.Value{
-				"static_layer_0": {Kind: &_struct.Value_StringValue{StringValue: "value"}},
+		Layer: &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"static_layer_0": {Kind: &structpb.Value_StringValue{StringValue: "value"}},
 			}}}
 )
 
@@ -198,6 +214,13 @@ func TestJSON_Marshal(t *testing.T) {
 			s:       JSON{},
 			args:    args{res: route},
 			want:    routeJSON,
+			wantErr: false,
+		},
+		{
+			name:    "Serialize scoped route to json",
+			s:       JSON{},
+			args:    args{res: scopedRoute},
+			want:    scopedRouteJSON,
 			wantErr: false,
 		},
 		{
@@ -267,6 +290,13 @@ func TestJSON_Unmarshal(t *testing.T) {
 			s:       JSON{},
 			args:    args{str: routeJSON, res: &envoy_config_route_v3.RouteConfiguration{}},
 			want:    route,
+			wantErr: false,
+		},
+		{
+			name:    "Deserialize scoped route from json",
+			s:       JSON{},
+			args:    args{str: scopedRouteJSON, res: &envoy_config_route_v3.ScopedRouteConfiguration{}},
+			want:    scopedRoute,
 			wantErr: false,
 		},
 		{

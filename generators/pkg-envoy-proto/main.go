@@ -108,7 +108,7 @@ func listProtoPackages(version string) []string {
 		dir, filename := filepath.Split(f.Name)
 		dir = filepath.Clean(dir)
 		// Look only under path "envoy/"
-		if !strings.HasPrefix(dir, "envoy/") {
+		if !strings.HasPrefix(dir, "envoy/") && !strings.HasPrefix(dir, "contrib/envoy/") {
 			return nil
 		}
 		// Find all proto files for the specified API version
@@ -131,6 +131,10 @@ func writePackageFile(packagePath string, importList []string) {
 	f, err := os.OpenFile(packagePath, os.O_CREATE|os.O_RDWR, 0644)
 	checkIfError(err)
 	defer f.Close()
+
+	// Reset file contents before writing
+	f.Truncate(0)
+	f.Seek(0, 0)
 
 	pkg := NewFile(packageName)
 	pkg.Anon(importList...)

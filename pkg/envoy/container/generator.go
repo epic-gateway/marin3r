@@ -41,9 +41,11 @@ type ContainerConfig struct {
 	APIVersion       string
 
 	// Shutdown manager container configuration
-	ShutdownManagerEnabled bool
-	ShutdownManagerPort    int32
-	ShutdownManagerImage   string
+	ShutdownManagerEnabled       bool
+	ShutdownManagerPort          int32
+	ShutdownManagerImage         string
+	ShutdownManagerDrainSeconds  int64
+	ShutdownManagerDrainStrategy defaults.DrainStrategy
 }
 
 func (cc *ContainerConfig) Containers() []corev1.Container {
@@ -61,6 +63,12 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 				"--service-cluster",
 				cc.ClusterID,
 			}
+			if cc.ShutdownManagerEnabled {
+				args = append(args,
+					"--drain-time-s", fmt.Sprintf("%d", cc.ShutdownManagerDrainSeconds),
+					"--drain-strategy", string(cc.ShutdownManagerDrainStrategy),
+				)
+			}
 			if len(cc.ExtraArgs) > 0 {
 				args = append(args, cc.ExtraArgs...)
 			}
@@ -76,6 +84,7 @@ func (cc *ContainerConfig) Containers() []corev1.Container {
 		Ports: append(cc.Ports, corev1.ContainerPort{
 			Name:          "admin",
 			ContainerPort: cc.AdminPort,
+			Protocol:      corev1.ProtocolTCP,
 		}),
 		VolumeMounts: []corev1.VolumeMount{
 			{
@@ -161,7 +170,8 @@ func (cc *ContainerConfig) InitContainers() []corev1.Container {
 				Name: "POD_NAME",
 				ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
-						FieldPath: "metadata.name",
+						FieldPath:  "metadata.name",
+						APIVersion: "v1",
 					},
 				},
 			},
@@ -169,7 +179,8 @@ func (cc *ContainerConfig) InitContainers() []corev1.Container {
 				Name: "POD_NAMESPACE",
 				ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
-						FieldPath: "metadata.namespace",
+						FieldPath:  "metadata.namespace",
+						APIVersion: "v1",
 					},
 				},
 			},
@@ -177,7 +188,8 @@ func (cc *ContainerConfig) InitContainers() []corev1.Container {
 				Name: "HOST_NAME",
 				ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
-						FieldPath: "spec.nodeName",
+						FieldPath:  "spec.nodeName",
+						APIVersion: "v1",
 					},
 				},
 			},
@@ -202,6 +214,9 @@ func (cc *ContainerConfig) InitContainers() []corev1.Container {
 				MountPath: cc.ConfigBasePath,
 			},
 		},
+		ImagePullPolicy:          corev1.PullIfNotPresent,
+		TerminationMessagePath:   corev1.TerminationMessagePathDefault,
+		TerminationMessagePolicy: corev1.TerminationMessageReadFile,
 	}}
 
 	return containers
@@ -214,7 +229,8 @@ func (cc *ContainerConfig) Volumes() []corev1.Volume {
 			Name: cc.TLSVolume,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: cc.ClientCertSecret,
+					SecretName:  cc.ClientCertSecret,
+					DefaultMode: pointer.Int32(420),
 				},
 			},
 		},

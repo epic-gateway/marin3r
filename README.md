@@ -194,6 +194,11 @@ spec:
     routes:
       - name: route1
         value: {"name":"route1","virtual_hosts":[{"name":"vhost","domains":["*"],"routes":[{"match":{"prefix":"/"},"direct_response":{"status":200}}]}]}
+    # ScopedRoutes is a list of the Envoy Scoped Route resource type.
+    # API V3 reference: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/scoped_route.proto
+    scopedRoutes:
+      - name: scoped_route1
+        value: {"name":"scoped_route1","route_configuration_name":"route1","key":{"fragments":[{"string_key":"test"}]}}
     # Listeners is a list of the Envoy Listener resource type.
     # API V3 reference: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/listener/v3/listener.proto
     listeners:
@@ -264,6 +269,8 @@ The MARIN3R mutating admission webhook will inject Envoy containers in any Pod a
 | marin3r.3scale.net/shutdown-manager.image                 | Envoy's shutdown manager image                                                                                                                                                                                 | If unset, the operator will select the appropriate image |
 | marin3r.3scale.net/init-manager.image                     | Envoy's init manager image                                                                                                                                                                                     | If unset, the operator will select the appropriate image |
 | marin3r.3scale.net/shutdown-manager.extra-lifecycle-hooks | Comma separated list of container names whose stop should be coordinated with the shutdown-manager. You usually would want to add containers that act as upstream clusters for the Envoy sidecar               | N/A                                                      |
+| marin3r.3scale.net/shutdown-manager.drain-time            | The time in seconds that Envoy will drain connections during a shutdown or when individual listeners are being modified or removed via LDS.                                                                    | 300                                                      |
+| marin3r.3scale.net/shutdown-manager.drain-strategy        | Determine behaviour of Envoy during the shutdown drain sequence https://www.envoyproxy.io/docs/envoy/latest/operations/cli#cmdoption-drain-strategy                                                            | gradual                                                  |
 
 <!-- omit in toc -->
 #### `marin3r.3scale.net/ports` syntax

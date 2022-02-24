@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/3scale-ops/marin3r/pkg/envoy/container/defaults"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
@@ -28,7 +26,7 @@ type PodMutator struct {
 	decoder *admission.Decoder
 }
 
-//+kubebuilder:webhook:path=/pod-v1-mutate,mutating=true,failurePolicy=fail,sideEffects=None,groups=core,resources=pods,verbs=create,versions=v1,name=sidecar-injector.marin3r.3scale.net,admissionReviewVersions={v1,v1beta1}
+//+kubebuilder:webhook:path=/pod-v1-mutate,mutating=true,failurePolicy=fail,sideEffects=None,groups=core,resources=pods,verbs=create,versions=v1,name=sidecar-injector.marin3r.3scale.net,admissionReviewVersions=v1
 
 // Handle injects an envoy container in every incoming Pod
 func (a *PodMutator) Handle(ctx context.Context, req admission.Request) admission.Response {
@@ -57,7 +55,7 @@ func (a *PodMutator) Handle(ctx context.Context, req admission.Request) admissio
 	if isShtdnMgrEnabled(pod.GetAnnotations()) {
 		// Increase the TerminationGracePeriodSeconds parameter if shutdown
 		// manager is enabled
-		pod.Spec.TerminationGracePeriodSeconds = pointer.Int64Ptr(defaults.GracefulShutdownTimeoutSeconds)
+		pod.Spec.TerminationGracePeriodSeconds = &config.generator.ShutdownManagerDrainSeconds
 		// Add extra container lifecycle hooks
 		containers, err := config.addExtraLifecycleHooks(pod.Spec.Containers, pod.GetAnnotations())
 		if err != nil {
