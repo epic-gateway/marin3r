@@ -74,11 +74,13 @@ func (r *EnvoyConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		ctx, log, r.Client, r.Scheme, ec,
 	)
 
+	log.Info("*** Update 1", "status", ec.Status)
 	result, err := revisionReconciler.Reconcile()
 	if result.Requeue || err != nil {
 		return result, err
 	}
 
+	log.Info("*** Update 2", "status", ec.Status)
 	if ok := envoyconfig.IsStatusReconciled(ec, revisionReconciler.GetCacheState(), revisionReconciler.PublishedVersion(), revisionReconciler.GetRevisionList()); !ok {
 		if err := r.Client.Status().Update(ctx, ec); err != nil {
 			return ctrl.Result{}, err
