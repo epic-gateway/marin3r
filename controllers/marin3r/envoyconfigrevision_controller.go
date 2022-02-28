@@ -35,6 +35,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/retry"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -131,11 +132,8 @@ func (r *EnvoyConfigRevisionReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 	}
 
-	if ok := envoyconfigrevision.IsStatusReconciled(ecr, vt, r.XdsCache, r.DiscoveryStats); !ok {
-		if err := r.Client.Status().Update(ctx, ecr); err != nil {
-			log.Error(err, "unable to update EnvoyConfigRevision status")
-		}
-		log.Info("status updated for EnvoyConfigRevision resource")
+	if err := r.reconcileStatus(ctx, ecr, vt); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	if ecr.Status.Conditions.IsTrueFor(marin3rv1alpha1.RevisionPublishedCondition) {
@@ -144,6 +142,35 @@ func (r *EnvoyConfigRevisionReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	return ctrl.Result{}, nil
 
+}
+
+// reconcileStatus takes an EnvoyConfigRevision and a VersionTracker
+// and updates the ECR to match what IsStatusReconciled() wants it to
+// be. It will retry in case of update conflicts.
+func (r *EnvoyConfigRevisionReconciler) reconcileStatus(ctx context.Context, ecr *marin3rv1alpha1.EnvoyConfigRevision, vt *marin3rv1alpha1.VersionTracker) error {
+	key := client.ObjectKey{Namespace: ecr.GetNamespace(), Name: ecr.GetName()}
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// Fetch the resource here; you need to refetch it on every try,
+		// since if you got a conflict on the last update attempt then
+		// you need to get the current version before making your own
+		// changes.
+		existing := marin3rv1alpha1.EnvoyConfigRevision{}
+		if err := r.Client.Get(ctx, key, &existing); err != nil {
+			return err
+		}
+		ecr.Status.DeepCopyInto(&existing.Status)
+
+		if ok := envoyconfigrevision.IsStatusReconciled(ecr, vt, r.XdsCache, r.DiscoveryStats); !ok {
+			if err := r.Client.Status().Update(ctx, &existing); err != nil {
+				r.Log.Info("EC Status update conflict, will retry", "ec", key)
+				return err
+			}
+		}
+		r.Log.V(1).Info("Status updated for EnvoyConfig resource", "ec", key)
+
+		return nil
+	})
 }
 
 func (r *EnvoyConfigRevisionReconciler) taintSelf(ctx context.Context, ecr *marin3rv1alpha1.EnvoyConfigRevision,
