@@ -25,6 +25,8 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -93,7 +95,8 @@ func (r *EnvoyConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	if ok := envoyconfig.IsStatusReconciled(ec, revisionReconciler.GetCacheState(), revisionReconciler.PublishedVersion(), revisionReconciler.GetRevisionList()); !ok {
-		if err := r.Client.Status().Update(ctx, ec); err != nil {
+		if err := r.reconcileStatus(ctx, ec); err != nil {
+			// if err := r.Client.Status().Update(ctx, ec); err != nil {
 			log.Error(err, "unable to update EnvoyConfig status")
 			return ctrl.Result{}, err
 		}
@@ -102,6 +105,32 @@ func (r *EnvoyConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// reconcileStatus takes an EnvoyConfig object in memory and updates
+// the persistent copy to match. It will retry in case of update
+// conflicts.
+func (r *EnvoyConfigReconciler) reconcileStatus(ctx context.Context, ec *marin3rv1alpha1.EnvoyConfig) error {
+	name := types.NamespacedName{Namespace: ec.GetNamespace(), Name: ec.GetName()}
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// You need to Get the resource on every try, since if you got a
+		// conflict on the last update attempt then you need to get the
+		// current version before making changes.
+		existing := marin3rv1alpha1.EnvoyConfig{}
+		if err := r.Client.Get(ctx, name, &existing); err != nil {
+			return err
+		}
+		ec.Status.DeepCopyInto(&existing.Status)
+
+		if err := r.Client.Status().Update(ctx, &existing); err != nil {
+			r.Log.Info("EC Status update conflict, will retry", "ec", name)
+			return err
+		}
+		r.Log.V(1).Info("Status updated for EnvoyConfig resource", "ec", name)
+
+		return nil
+	})
 }
 
 // SetupWithManager adds the controller to the manager
