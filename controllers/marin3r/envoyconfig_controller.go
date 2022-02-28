@@ -25,6 +25,7 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -80,16 +81,36 @@ func (r *EnvoyConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return result, err
 	}
 
-	if ok := envoyconfig.IsStatusReconciled(ec, revisionReconciler.GetCacheState(), revisionReconciler.PublishedVersion(), revisionReconciler.GetRevisionList()); !ok {
-		if err := r.Client.Status().Update(ctx, ec); err != nil {
-			log.Error(err, "unable to update EnvoyConfig status")
-			return ctrl.Result{}, err
-		}
-		log.Info("status updated for EnvoyConfig resource")
-		return reconcile.Result{}, nil
-	}
+	return ctrl.Result{}, r.reconcileStatus(ctx, log, ec, revisionReconciler)
+}
 
-	return ctrl.Result{}, nil
+// reconcileStatus takes an EnvoyConfig and a RevisionReconciler and
+// updates the EC to match what the RR wants it to be. It will retry
+// in case of update conflicts.
+func (r *EnvoyConfigReconciler) reconcileStatus(ctx context.Context, log logr.Logger, ec *marin3rv1alpha1.EnvoyConfig, revisionReconciler envoyconfig.RevisionReconciler) error {
+	key := client.ObjectKey{Namespace: ec.GetNamespace(), Name: ec.GetName()}
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// Fetch the resource here; you need to refetch it on every try,
+		// since if you got a conflict on the last update attempt then
+		// you need to get the current version before making your own
+		// changes.
+		existing := marin3rv1alpha1.EnvoyConfig{}
+		if err := r.Client.Get(ctx, key, &existing); err != nil {
+			return err
+		}
+		ec.Status.DeepCopyInto(&existing.Status)
+
+		if ok := envoyconfig.IsStatusReconciled(&existing, revisionReconciler.GetCacheState(), revisionReconciler.PublishedVersion(), revisionReconciler.GetRevisionList()); !ok {
+			if err := r.Client.Status().Update(ctx, &existing); err != nil {
+				log.Info("EC Status update conflict, will retry", "ec", key)
+				return err
+			}
+		}
+		log.V(1).Info("Status updated for EnvoyConfig resource", "ec", key)
+
+		return nil
+	})
 }
 
 // SetupWithManager adds the controller to the manager
