@@ -14,12 +14,6 @@ spec:
             - operator
             - --leader-elect
           resources:
-            limits:
-              cpu: 300m
-              memory: 300Mi
-            requests:
-              cpu: 50m
-              memory: 100Mi
           ports:
             - containerPort: 8080
               protocol: TCP
