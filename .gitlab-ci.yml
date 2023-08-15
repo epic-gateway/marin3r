@@ -13,7 +13,7 @@
   fi
 
 manifests:
-  image: golang:1.16-bullseye
+  image: golang:1.19-bookworm
 
   before_script:
   - *set-tag
