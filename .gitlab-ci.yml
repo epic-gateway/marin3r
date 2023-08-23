@@ -1,3 +1,7 @@
+stages:
+- generate
+- build
+
 .set-tag: &set-tag
 - |
   if [ -n "${CI_COMMIT_TAG}" ] ; then
@@ -12,14 +16,32 @@
     export TAG_SPECIFIC="0.0.0-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHORT_SHA}"
   fi
 
-manifests:
+.debian-setup: &debian-setup
+- *set-tag
+- apt-get update
+- apt-get install -y gettext-base
+
+generate:
+  stage: generate
   image: golang:1.19-bookworm
 
   before_script:
-  - *set-tag
-  - apt-get update
-  - apt-get install -y gettext-base
-  - mkdir build
+  - *debian-setup
+
+  script:
+  - make IMAGE_TAG_BASE=registry.gitlab.com/acnodal/epic/marin3r VERSION=${TAG_SPECIFIC} generate go-generate
+
+  artifacts:
+    paths:
+    - pkg/image/zz_generated.go
+
+manifests:
+  stage: build
+  image: golang:1.19-bookworm
+
+  before_script:
+  - *debian-setup
+- - mkdir build
 
   script:
   - make IMAGE_TAG_BASE=registry.gitlab.com/acnodal/epic/marin3r VERSION=${TAG_SPECIFIC} bundle
@@ -31,6 +53,7 @@ manifests:
       - config
 
 images:
+  stage: build
   image: docker:20.10.10
   services:
   - docker:20.10.10-dind
