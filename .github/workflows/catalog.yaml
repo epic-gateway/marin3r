@@ -1,11 +1,6 @@
 name: catalog
 
-on:
-  push:
-    branches:
-    - main
-    paths:
-    - catalog/marin3r/stable-channel.yaml
+on: [push, pull_request]
 
 jobs:
   build:
