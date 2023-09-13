@@ -1,0 +1,45 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with: {go-version: '=1.19.8'}
+
+    - name: Export release name
+      run: |
+        NEW_RELEASE=${{ github.ref_name }}
+        # if we're building from a branch (i.e., not a tag) then add
+        # the short sha so we can have more than one build per branch
+        if [[ ${{ github.ref }} != refs/tags/* ]]; then
+          NEW_RELEASE=${NEW_RELEASE}-$(git rev-parse --short HEAD)
+        fi
+        echo $NEW_RELEASE
+        echo "NEW_RELEASE=$NEW_RELEASE" >> $GITHUB_ENV
+
+    - name: Build image
+      run: make VERSION="${{ env.NEW_RELEASE }}" docker-build
+
+    - name: Login to quay.io/3scale
+      if: ${{ env.NEW_RELEASE != '' }}
+      uses: docker/login-action@v2
+      with:
+        registry: quay.io
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Push new operator image
+      run: make VERSION="${{ env.NEW_RELEASE }}" docker-push
+
+    - name: Create a new draft-release in github
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        title: "${{ env.NEW_RELEASE }}"
+        draft: true
