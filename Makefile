@@ -85,8 +85,10 @@ help: ## Display this help.
 
 ##@ Development
 
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+manifests: controller-gen kustomize ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+# build a manifest for EPIC
+	$(KUSTOMIZE) build config/epic > build/marin3r-manifest-epic.yaml
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
@@ -262,8 +264,6 @@ bundle: operator-sdk manifests kustomize ## Generate bundle manifests and metada
 	cd config/webhook && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	$(OPERATOR_SDK) bundle validate ./bundle
-# build a manifest for EPIC
-	$(KUSTOMIZE) build config/epic > build/marin3r-manifest-epic.yaml
 
 .PHONY: bundle-build
 bundle-build: ## Build the bundle image.
