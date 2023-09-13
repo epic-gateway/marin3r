@@ -1,0 +1,38 @@
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-go@v4
+      with: {go-version: '=1.19.8'}
+
+    - name: Decide what we're going to call this
+      run: |
+        TAG=${{ github.ref_name }}
+        # if we're building from a branch (i.e., not a tag) then add
+        # the short sha so we can have more than one build per branch
+        if [[ ${{ github.ref }} != refs/tags/* ]]; then
+          TAG=${TAG}-$(git rev-parse --short HEAD)
+        fi
+        echo $TAG
+        echo "TAG=$TAG" >> $GITHUB_ENV
+
+    - name: Make
+      run: |
+        make IMAGE_TAG_BASE=quay.io/epic-gateway/marin3r VERSION="${{ env.TAG }}" manifests docker-build
+
+    - name: Push
+      run: |
+        docker login -u epic-gateway+github_actions -p ${{ secrets.QUAY_EPIC_GATEWAY }} quay.io
+        make IMAGE_TAG_BASE=quay.io/epic-gateway/marin3r VERSION="${{ env.TAG }}" docker-push
+
+    - name: Create a pre-release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        files: |
+          build/marin3r-manifest-epic.yaml
