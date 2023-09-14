@@ -19,17 +19,17 @@ jobs:
           TAG=${TAG}-$(git rev-parse --short HEAD)
         fi
         echo $TAG
-        echo "TAG=$TAG" >> $GITHUB_ENV
+        echo "IMG=quay.io/epic-gateway/marin3r:${TAG}" >> $GITHUB_ENV
 
     - name: Make
       run: |
         mkdir -p build
-        make IMAGE_TAG_BASE=quay.io/epic-gateway/marin3r VERSION="${{ env.TAG }}" manifests docker-build
+        make IMG=${IMG} manifests docker-build
 
     - name: Push
       run: |
         docker login -u epic-gateway+github_actions -p ${{ secrets.QUAY_EPIC_GATEWAY }} quay.io
-        make IMAGE_TAG_BASE=quay.io/epic-gateway/marin3r VERSION="${{ env.TAG }}" docker-push
+        make IMG=${IMG} docker-push
 
     - name: Create a pre-release
       uses: "marvinpinto/action-automatic-releases@latest"
