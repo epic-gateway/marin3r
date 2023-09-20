@@ -17,14 +17,18 @@ jobs:
         # the short sha so we can have more than one build per branch
         if [[ ${{ github.ref }} != refs/tags/* ]]; then
           TAG=${TAG}-$(git rev-parse --short HEAD)
+        else
+          # Marin3r's Makefile adds a "v" so we need to strip it off
+          TAG=${TAG:1}
         fi
         echo $TAG
-        echo "IMG=quay.io/epic-gateway/marin3r:${TAG}" >> $GITHUB_ENV
+        echo "IMG=quay.io/epic-gateway/marin3r:v${TAG}" >> $GITHUB_ENV
+        echo "TAG=${TAG}" >> $GITHUB_ENV
 
     - name: Make
       run: |
         mkdir -p build
-        make IMG=${IMG} manifests docker-build
+        make IMG=${IMG} VERSION=${TAG} go-generate manifests docker-build
 
     - name: Push
       run: |
