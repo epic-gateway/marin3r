@@ -88,6 +88,7 @@ help: ## Display this help.
 manifests: controller-gen kustomize ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 # build a manifest for EPIC
+	(cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG})
 	$(KUSTOMIZE) build config/epic > build/marin3r-manifest-epic.yaml
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
